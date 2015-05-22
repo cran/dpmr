@@ -1,0 +1,13 @@
+bce919b75125c01f3228372b3df8677e *DESCRIPTION
+41f786fccff7fae0e016fe73fff0ddb7 *NAMESPACE
+459bb6ab6ef3a7bea12c17de843a778d *NEWS
+e9cbca953bd6b9940da44296baf45e22 *R/datapackage_info.R
+ada57d3fffca4f24768a193a338fa1ee *R/datapackage_init.R
+c1ebc7c540bde12d482cb16c8aee8cac *R/datapackage_install.R
+2f0a8bb25ed16c82d1be4ce989a59b2e *R/github-utils.R
+4bb193cd163f066bfc44a28629e0e984 *R/utils.R
+70cad3f440c59bc7b67c338df46158ff *README.md
+cefce982e871e87a47ed2faa24280ee7 *man/datapackage_info.Rd
+40672633901b874eedaf1f468fb3a51c *man/datapackage_init.Rd
+6ba9c7a964ea46a2511138b469c38431 *man/datapackage_install.Rd
+6ff4db2c25cf3c25dc36563a3ae78581 *man/meta_template.Rd
