@@ -5,6 +5,7 @@
 
 #' Get a connection to a GitHub repository
 #' @keywords internal
+#' @importFrom utils modifyList
 #' @noRd
 github_get_conn <- function(repo, username = getOption("github.user"),
                             ref = "master", pull = NULL, subdir = NULL,
@@ -68,6 +69,7 @@ github_get_conn <- function(repo, username = getOption("github.user"),
 
 #' Parse a GitHub path
 #' @keywords internal
+#' @importFrom stats setNames
 #' @noRd
 
 github_parse_path <- function(path) {

@@ -5,12 +5,14 @@
 #' data package.
 #' @param package_name character string name for the data package. Unnecessary
 #' if the \code{name} field is specified in \code{meta}.
+#' @param output_dir character string naming the output directory to save the
+#' data package into. By default the current working directory is used.
 #' @param meta The list object with the data frame's meta data. The list
 #' item names must conform to the Open Knowledge Foundation's Data Package
 #' Protocol (see \url{http://dataprotocols.org/data-packages/}). Must include
 #' the \code{name}, \code{license}, and \code{version} fields.
 #' If \code{resources} is not specified then this will be automatically
-#' generated.\code{dpmr} uses \code{jsonlite} to convert the list into a
+#' generated. \code{dpmr} uses \code{jsonlite} to convert the list into a
 #' JSON file. See the \code{\link{toJSON}} documentation for details.
 #' If \code{meta = NULL} then a barebones \code{datapackage.json} file will be
 #' created.
@@ -33,10 +35,10 @@
 #' Data <- data.frame(ID, A, B, C)
 #'
 #' # Initialise data package with barebones, automatically generated metadata
-#' datapackage_init(df = Data, package_name = 'My_Data_Package')
+#' datapackage_init(df = Data, package_name = 'my-data-package')
 #'
 #' # Initialise with user specified metadata
-#' meta_list <- list(name = 'My_Data_Package',
+#' meta_list <- list(name = 'my-data-package',
 #'                  title = 'A fake data package',
 #'                  last_updated = Sys.Date(),
 #'                  version = '0.1',
@@ -56,14 +58,24 @@
 
 datapackage_init <- function(df,
                             package_name = NULL,
+                            output_dir = getwd(),
                             meta = NULL,
                             source_cleaner = NULL,
                             source_cleaner_rename = TRUE,
                             ...)
 {
     #------------------- Initialize data package directories ----------------- #
-    if (missing(df)) stop('df must be specified.', call. = F)
-    class(df) <- 'data.frame'
+    if (missing(df)) stop('df must be specified.', call. = FALSE)
+    if (!is.data.frame(df)) stop('df must be a data.frame class object.',
+        call. = FALSE)
+    if ('tbl_df' %in% class(df)) {
+        message('Converting your tbl_df to a data.frame')
+        df <- as.data.frame(df)
+    }
+
+    # Set working directory for datapackage
+    old_dir <- getwd()
+    setwd(output_dir)
 
     if (!is.null(meta)){
         # Ensure that required fields are present in metadata list
@@ -78,7 +90,7 @@ datapackage_init <- function(df,
     }
     else if (is.null(meta$name)){
         if (is.null(package_name)) stop("Must specify the data package's name.",
-                                        call. = F)
+                                        call. = FALSE)
         name <- package_name
     }
     name <- gsub(name, pattern = ' ', replacement = '') # strip name whitespace
@@ -86,7 +98,7 @@ datapackage_init <- function(df,
     # Stop if data package already exists
     if (name %in% list.files()) stop(paste('A data package called', name,
                                     'already exists in this directory.'),
-                                    call. = F)
+                                    call. = FALSE)
 
     message(paste('\n--- Creating the', name,
             'data package ---\n'))
@@ -95,30 +107,30 @@ datapackage_init <- function(df,
     dir.create(paste0(name, '/scripts'))
 
     #----------------------- Create/validate datapackage.json ---------------- #
-    data_base_paths <- paste0('data/', name, '_data.csv')
+    data_base_paths <- paste0('data/', name, '-data.csv')
     if (is.null(meta)){ # Create bare
         message(paste0('Creating barebones metadata datapackage.json\n',
                     '- Please add additional information directly in:\n',
                     '  ', getwd(), '/', name, '/', 'datapackage.json\n\n',
                     '  For more information see: http://dataprotocols.org/data-packages/\n'))
         meta_template(df = df, name = name, data_paths = data_base_paths) %>%
-        toJSON(pretty = T) %>%
-        writeLines(con = paste0(name, '/datapackage.json'))
+            toJSON(pretty = T,auto_unbox=T) %>%
+            writeLines(con = paste0(name, '/datapackage.json'))
     }
     else if (!is.null(meta)){
-        if (class(meta) != 'list') stop('meta must be a list', call. = F)
+        if (class(meta) != 'list') stop('meta must be a list', call. = FALSE)
 
         if (is.null(meta$resources)) {
             message('Adding resources to metadata saved in datapackage.json.\n')
             list(meta, resources_create(data_paths = data_base_paths,
                                         df = df)) %>%
-                toJSON(pretty = T) %>%
+                toJSON(pretty = T,auto_unbox=T) %>%
                 writeLines(con = paste0(name, '/datapackage.json'))
         }
 
         else if (!is.null(meta$resources)){
             message('Meta data saved in: datapackage.json\n')
-            meta %>% toJSON(pretty = T) %>%
+            meta %>% toJSON(pretty = T, auto_unbox = T) %>%
             writeLines(con = paste0(name, '/datapackage.json'))
         }
     }
@@ -155,4 +167,6 @@ datapackage_init <- function(df,
     # Write the data file into data/ as a CSV
     message(paste('Saving data frame as:', data_base_paths))
     export(df, file = paste0(name, '/', data_base_paths), ...)
+
+    setwd(old_dir)
 }

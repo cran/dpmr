@@ -27,6 +27,7 @@
 #'          datapackage_install()
 #' }
 #' @importFrom rio import
+#' @importFrom utils unzip
 #' @importFrom digest digest
 #' @importFrom jsonlite fromJSON
 #' @importFrom magrittr %>%
